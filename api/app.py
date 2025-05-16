@@ -6,7 +6,11 @@ import re
 
 load_dotenv()
 
-app = Flask(__name__)
+app = Flask(
+    __name__,
+    template_folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), '../templates'),
+    static_folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), '../static')
+)
 
 KAKAO_REST_API_KEY = os.getenv('KAKAO_REST_API_KEY')
 KAKAO_JAVASCRIPT_KEY = os.getenv('KAKAO_JAVASCRIPT_KEY')
