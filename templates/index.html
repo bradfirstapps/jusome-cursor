@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>한국 주소 변환기 | Jusome</title>
+    <meta name="description" content="공공기관, 국제배송, 비즈니스 등에서 신뢰할 수 있는 한글 주소 영문 변환 서비스. 도로명주소, 지번주소, 영문주소 간 변환 및 지도 위치 확인. jusome.com - 강승현, 고양시 덕양구 향동로 217 425호.">
+    <meta name="keywords" content="한국 주소 변환, 도로명주소, 지번주소, 영문주소, 주소 변환기, 공공기관, Jusome, Korean address converter, Road name address, English address, Government, jusome.com, 강승현, 고양시, Goyang-si, Kang Seunghyun">
+    <meta property="og:title" content="한국 주소 변환기 | Jusome">
+    <meta property="og:description" content="공식 API 기반, 신뢰할 수 있는 한국 주소 변환 서비스. jusome.com">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://jusome.com/">
+    <meta property="og:image" content="/static/og-image.png">
+    <link rel="icon" href="/static/favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body { font-family: 'Noto Sans KR', Arial, sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+  <header class="bg-blue-900 text-white shadow-sm sticky top-0 z-10">
+    <div class="container mx-auto flex items-center justify-between py-4 px-4">
+      <a href="/" class="text-2xl font-bold tracking-tight">Jusome</a>
+      <div class="flex gap-2">
+        <a href="/" class="underline font-semibold">한국어</a>
+        <span>|</span>
+        <a href="/en" class="hover:underline">English</a>
+      </div>
+    </div>
+  </header>
+  <main class="flex-1 flex flex-col items-center py-6 md:py-12">
+    <section class="w-full max-w-6xl bg-white rounded-3xl shadow-2xl p-2 md:p-16 mb-8 border border-blue-100 flex flex-col gap-8">
+      <h1 class="text-2xl md:text-4xl font-bold text-blue-900 mb-2 text-center">한국 주소 변환기</h1>
+      <p class="text-center text-gray-600 mb-2 md:mb-4 text-base md:text-lg">도로명주소·지번주소·영문주소·우편번호 즉시 변환 서비스<br>공공기관, 국제배송, 비즈니스 등 다양한 상황에서 신뢰할 수 있는 주소 정보</p>
+      <div class="bg-blue-50 border-l-4 border-blue-700 p-3 md:p-6 mb-2 md:mb-4 text-blue-900 text-xs md:text-base rounded">
+        본 서비스는 행정안전부 도로명주소 API와 카카오맵 API를 활용하여 정확한 주소 정보를 제공합니다.<br>
+        도로명주소, 지번주소, 영문주소 변환 및 우편번호 검색이 한 번에 가능합니다.<br>
+        국제 배송, 우편물 발송, 공문서 작성 등에 필요한 모든 주소 정보를 표 형식으로 정리하여 제공합니다.
+      </div>
+      <div class="mb-2 md:mb-4 w-full flex flex-col items-center">
+        <form id="address-form" class="w-full flex flex-col sm:flex-row gap-2 md:gap-4 items-center bg-gray-50 rounded-xl shadow px-2 py-3 md:px-8 md:py-6">
+          <input type="text" class="w-full sm:flex-1 min-w-0 border border-gray-300 rounded-lg px-4 py-3 md:px-6 md:py-4 focus:outline-none focus:ring-2 focus:ring-blue-700 text-base md:text-lg bg-white" id="korean-address" placeholder="예시: 서울 종로구 사직로 9" required>
+          <button type="submit" class="w-full sm:w-auto bg-blue-700 hover:bg-blue-800 text-white font-semibold rounded-lg px-6 md:px-10 py-3 md:py-4 transition text-base md:text-lg whitespace-nowrap shadow">주소 변환</button>
+        </form>
+        <div class="text-xs text-gray-500 mt-2 text-center">정확한 검색을 위해 도로명 또는 지번을 포함한 주소를 입력해주세요.<br>예시: "서울 종로구 사직로 9", "서울시 종로구 세종로 1-1"</div>
+      </div>
+      <div id="result" class="mb-2 md:mb-4"></div>
+      <div class="my-4 md:my-8">
+        <div class="ad-placeholder border-2 border-dashed border-gray-300 rounded-lg py-6 md:py-10 text-center text-gray-400 text-xs md:text-sm bg-gray-100">[광고 자리 - Google AdSense]</div>
+      </div>
+      <div id="map-container" style="display:none;">
+        <div id="map" class="w-full h-64 md:h-[480px] rounded-lg overflow-hidden border border-gray-200"></div>
+      </div>
+    </section>
+    <section class="w-full max-w-3xl bg-white rounded-xl shadow p-4 md:p-8 mb-8">
+      <h2 class="text-lg md:text-xl font-bold text-blue-900 mb-2">데이터 출처 및 신뢰성</h2>
+      <ul class="list-disc pl-5 text-gray-700 text-xs md:text-sm">
+        <li><b>행정안전부 도로명주소 API</b>: 대한민국 행정안전부에서 제공하는 공식 도로명주소 API를 사용하여 정확한 주소 정보를 제공합니다. 도로명주소, 지번주소, 우편번호 등은 실시간으로 업데이트되는 공식 데이터베이스에서 가져옵니다.</li>
+        <li><b>카카오맵 API</b>: 카카오에서 제공하는 공식 지도 API를 통해 정확한 위치 정보와 시각화된 지도를 제공합니다. 좌표 정보와 지도 데이터는 카카오의 최신 데이터베이스를 기반으로 합니다.</li>
+        <li>본 서비스는 공공데이터와 공식 API를 활용하여 최대한 정확한 정보를 제공하기 위해 노력하고 있습니다. 주소 정보는 실시간으로 업데이트되며, 모든 데이터는 공식 출처에서 제공받습니다.</li>
+      </ul>
+    </section>
+    <section class="w-full max-w-3xl bg-white rounded-xl shadow p-4 md:p-8 mb-8">
+      <h2 class="text-lg md:text-xl font-bold text-blue-900 mb-2">광고 및 정책 안내</h2>
+      <ul class="list-disc pl-5 text-gray-700 text-xs md:text-sm">
+        <li>Google AdSense 광고가 표시될 수 있습니다. 광고는 Google 정책을 준수합니다.</li>
+        <li>개인정보는 저장하지 않으며, 입력된 정보는 변환 및 지도 표시 목적 외에는 사용되지 않습니다.</li>
+        <li>문의: <a href="mailto:cadosy@gmail.com" class="text-blue-700 underline">cadosy@gmail.com</a> (담당자: 강승현)</li>
+      </ul>
+    </section>
+  </main>
+  <footer class="bg-blue-900 text-white w-full text-center text-xs py-6 mt-10">
+    <div>대표자: 강승현 | 주소: 경기도 고양시 덕양구 향동로 217, 425호</div>
+    <div>이메일: cadosy@gmail.com</div>
+    <div>© 2025 Jusome.com. All rights reserved.</div>
+    <div>
+      <a href="/privacy" class="underline">개인정보처리방침</a> |
+      <a href="/about" class="underline">서비스 안내</a> |
+      <a href="/contact" class="underline">문의하기</a>
+    </div>
+  </footer>
+  <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey={{ kakao_javascript_key }}&libraries=services"></script>
+  <script>
+    const form = document.getElementById('address-form');
+    const resultDiv = document.getElementById('result');
+    const mapDiv = document.getElementById('map');
+    let map, marker;
+    let returnType = 'kor';
+
+    function getMapSearchCandidates(addr) {
+      if (!addr) return [];
+      let base = addr.split(' (')[0].trim().replace(/\s+/g, ' ');
+      let candidates = [base];
+      // 행정구역 축약
+      candidates.push(
+        base.replace('특별시', ''),
+        base.replace('광역시', ''),
+        base.replace('도', ''),
+        base.replace('특별시', '시'),
+        base.replace('광역시', '시'),
+        base.replace('경기도', '경기'),
+        base.replace('서울특별시', '서울'),
+        base.replace('부산광역시', '부산'),
+        base.replace('대구광역시', '대구'),
+        base.replace('인천광역시', '인천'),
+        base.replace('광주광역시', '광주'),
+        base.replace('대전광역시', '대전'),
+        base.replace('울산광역시', '울산'),
+        base.replace('세종특별자치시', '세종')
+      );
+      // '구' 이하만 남기기
+      const guIdx = base.indexOf('구 ');
+      if (guIdx > -1) candidates.push(base.slice(guIdx));
+      // '동' 이하만 남기기
+      const dongIdx = base.indexOf('동 ');
+      if (dongIdx > -1) candidates.push(base.slice(dongIdx));
+      // 도로명+건물번호만 남기기 (띄어쓰기 O/X 모두)
+      const roadMatch = base.match(/([가-힣A-Za-z\-]+로|길|대로)\s*([0-9]+)/);
+      if (roadMatch) {
+        candidates.push(`${roadMatch[1]} ${roadMatch[2]}`);
+        candidates.push(`${roadMatch[1]}${roadMatch[2]}`); // 띄어쓰기 없이
+      }
+      // 중복 제거 및 공백 정리
+      return [...new Set(candidates.map(s => s.trim().replace(/\s+/g, ' ')).filter(Boolean))];
+    }
+
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const address = document.getElementById('korean-address').value.trim();
+      if (!address) return;
+      resultDiv.innerHTML = '<div class="text-blue-700">변환 중...</div>';
+      document.getElementById('map-container').style.display = 'none';
+      
+      // 주소 검색 요청 (1페이지)
+      await fetchAddresses(address, 1);
+    });
+    
+    // 주소 검색 함수 (페이지네이션 포함)
+    async function fetchAddresses(address, page) {
+      const res = await fetch('/convert', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({address, page})
+      });
+      
+      const data = await res.json();
+      
+      if (data.error) {
+        resultDiv.innerHTML = `<div class='bg-red-100 text-red-700 rounded-lg px-4 py-3 text-center'>${data.error}</div>`;
+        return;
+      }
+      
+      // 검색 결과 목록 표시
+      renderAddressList(data, address);
+    }
+    
+    // 검색 결과 목록 렌더링
+    function renderAddressList(data, searchTerm) {
+      let html = '';
+      const addresses = data.addresses || [];
+      const pagination = data.pagination || { total_count: 0, current_page: 1, total_pages: 0 };
+      
+      if (addresses.length === 0) {
+        resultDiv.innerHTML = `<div class='bg-red-100 text-red-700 rounded-lg px-4 py-3 text-center'>검색 결과가 없습니다.</div>`;
+        return;
+      }
+      
+      // 검색 결과 상단 정보
+      html += `<div class="mb-4">
+        <div class="flex justify-between items-center mb-2">
+          <h3 class="text-lg font-semibold text-blue-900">검색 결과</h3>
+          <span class="text-sm text-gray-600">총 ${pagination.total_count}개 결과 중 ${(pagination.current_page-1)*10+1}-${Math.min(pagination.current_page*10, pagination.total_count)}개</span>
+        </div>
+        <p class="text-sm text-gray-500 mb-2">검색어: "${searchTerm}"</p>
+      </div>`;
+      
+      // 주소 목록 테이블
+      html += `<div class="bg-white border border-gray-200 rounded-lg shadow-md overflow-hidden mb-4">
+        <table class="w-full text-left">
+          <thead class="bg-gray-50 border-b border-gray-200">
+            <tr>
+              <th class="px-4 py-3 text-gray-700 font-semibold">주소</th>
+              <th class="px-4 py-3 text-gray-700 font-semibold w-24 text-center">상세보기</th>
+            </tr>
+          </thead>
+          <tbody>`;
+      
+      // 각 주소 행 추가
+      addresses.forEach((addr, index) => {
+        const displayAddr = addr.road_addr || addr.jibun_addr || addr.eng_address || addr.kor_address;
+        html += `<tr class="border-b border-gray-100 hover:bg-gray-50">
+          <td class="px-4 py-3 break-all">${displayAddr}</td>
+          <td class="px-4 py-3 text-center">
+            <button onclick="getAddressDetail('${displayAddr.replace(/'/g, "\\'")}')" 
+                    class="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700">
+              선택
+            </button>
+          </td>
+        </tr>`;
+      });
+      
+      html += `</tbody></table></div>`;
+      
+      // 페이지네이션 UI
+      if (pagination.total_pages > 1) {
+        html += `<div class="flex justify-center gap-1 my-4">`;
+        
+        // 이전 페이지 버튼
+        const prevDisabled = pagination.current_page <= 1;
+        html += `<button 
+                  onclick="fetchAddresses('${searchTerm.replace(/'/g, "\\'")}', ${pagination.current_page - 1})" 
+                  class="px-3 py-1 rounded border ${prevDisabled ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-blue-600 hover:bg-blue-50'}"
+                  ${prevDisabled ? 'disabled' : ''}>
+                  이전
+                </button>`;
+        
+        // 페이지 번호 버튼들
+        const startPage = Math.max(1, pagination.current_page - 2);
+        const endPage = Math.min(pagination.total_pages, startPage + 4);
+        
+        for (let i = startPage; i <= endPage; i++) {
+          const isCurrentPage = i === pagination.current_page;
+          html += `<button 
+                    onclick="fetchAddresses('${searchTerm.replace(/'/g, "\\'")}', ${i})" 
+                    class="px-3 py-1 rounded border ${isCurrentPage ? 'bg-blue-600 text-white' : 'bg-white text-blue-600 hover:bg-blue-50'}">
+                    ${i}
+                  </button>`;
+        }
+        
+        // 다음 페이지 버튼
+        const nextDisabled = pagination.current_page >= pagination.total_pages;
+        html += `<button 
+                  onclick="fetchAddresses('${searchTerm.replace(/'/g, "\\'")}', ${pagination.current_page + 1})" 
+                  class="px-3 py-1 rounded border ${nextDisabled ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-blue-600 hover:bg-blue-50'}"
+                  ${nextDisabled ? 'disabled' : ''}>
+                  다음
+                </button>`;
+        
+        html += `</div>`;
+      }
+      
+      resultDiv.innerHTML = html;
+      document.getElementById('map-container').style.display = 'none';
+    }
+    
+    // 선택한 주소의 상세 정보 조회
+    async function getAddressDetail(address) {
+      if (!address) return;
+      
+      resultDiv.innerHTML = '<div class="text-blue-700">상세 정보 조회 중...</div>';
+      
+      const res = await fetch('/address_detail', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({address})
+      });
+      
+      const data = await res.json();
+      
+      if (data.error) {
+        resultDiv.innerHTML = `<div class='bg-red-100 text-red-700 rounded-lg px-4 py-3 text-center'>${data.error}</div>`;
+        return;
+      }
+      
+      // 상세 정보 표시
+      let html = '';
+      if (data.eng_address || data.road_addr || data.jibun_addr || data.kor_address) {
+        html += '<div class="bg-white border border-gray-200 rounded-lg shadow-md overflow-hidden">';
+        html += '<table class="w-full text-left">';
+        html += '<thead class="bg-gray-50 border-b border-gray-200">';
+        html += '<tr><th class="px-4 py-3 text-gray-700 font-semibold w-1/4">구분</th><th class="px-4 py-3 text-gray-700 font-semibold">주소 정보</th></tr>';
+        html += '</thead><tbody>';
+        
+        if (data.eng_address) html += `<tr class="border-b border-gray-100"><td class="px-4 py-3 text-gray-500 font-medium bg-gray-50">영문 주소</td><td class="px-4 py-3 break-all">${data.eng_address}</td></tr>`;
+        if (data.road_addr) html += `<tr class="border-b border-gray-100"><td class="px-4 py-3 text-gray-500 font-medium bg-gray-50">도로명 주소</td><td class="px-4 py-3 break-all">${data.road_addr}</td></tr>`;
+        if (data.jibun_addr) html += `<tr class="border-b border-gray-100"><td class="px-4 py-3 text-gray-500 font-medium bg-gray-50">지번 주소</td><td class="px-4 py-3 break-all">${data.jibun_addr}</td></tr>`;
+        if (data.kor_address) html += `<tr class="border-b border-gray-100"><td class="px-4 py-3 text-gray-500 font-medium bg-gray-50">한글 주소</td><td class="px-4 py-3 break-all">${data.kor_address}</td></tr>`;
+        if (data.zip_no) html += `<tr><td class="px-4 py-3 text-gray-500 font-medium bg-gray-50">우편번호</td><td class="px-4 py-3 break-all">${data.zip_no}</td></tr>`;
+        
+        html += '</tbody></table>';
+        html += '</div>';
+        resultDiv.innerHTML = html;
+        
+        // 지도 검색용 주소 후보 생성
+        let mapCandidates = [];
+        if (data.road_addr) mapCandidates = mapCandidates.concat(getMapSearchCandidates(data.road_addr));
+        if (data.kor_address) mapCandidates = mapCandidates.concat(getMapSearchCandidates(data.kor_address));
+        mapCandidates = mapCandidates.concat([address]);
+        mapCandidates = [...new Set(mapCandidates)]; // 중복 제거
+        
+        document.getElementById('map-container').style.display = '';
+        await showMap(mapCandidates);
+      }
+    }
+
+    async function showMap(addressCandidates) {
+      mapDiv.innerHTML = '';
+      let idx = 0;
+      async function tryNext() {
+        if (idx >= addressCandidates.length) {
+          mapDiv.innerHTML = '<div class="bg-yellow-100 text-yellow-700 rounded-lg px-4 py-3 text-center">지도를 표시할 수 없습니다.</div>';
+          return;
+        }
+        // Flask /geocode로 좌표 요청
+        try {
+          const res = await fetch('/geocode', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({address: addressCandidates[idx]})
+          });
+          const data = await res.json();
+          if (data.lat && data.lng) {
+            mapDiv.innerHTML = '';
+            map = new kakao.maps.Map(mapDiv, {center: new kakao.maps.LatLng(data.lat, data.lng), level: 3});
+            marker = new kakao.maps.Marker({map: map, position: new kakao.maps.LatLng(data.lat, data.lng)});
+            return;
+          } else {
+            idx++;
+            tryNext();
+          }
+        } catch (e) {
+          idx++;
+          tryNext();
+        }
+      }
+      tryNext();
+    }
+  </script>
+</body>
+</html> 

@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Korean Address Converter | Jusome</title>
+  <meta name="description" content="Convert Korean addresses to English instantly. Road name, lot number, and English address conversion service for international shipping, business, and public use.">
+  <meta name="keywords" content="Korean address to English, Korean address converter, English address, international shipping, Jusome, Goyang-si, Kang Seunghyun">
+  <link rel="icon" href="/static/favicon.ico">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>body { font-family: 'Noto Sans KR', Arial, sans-serif; }</style>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+  <header class="bg-blue-900 text-white shadow-sm sticky top-0 z-10">
+    <div class="container mx-auto flex items-center justify-between py-4 px-4">
+      <a href="/en" class="text-2xl font-bold tracking-tight">Jusome</a>
+      <div class="flex gap-2">
+        <a href="/" class="hover:underline">한국어</a>
+        <span>|</span>
+        <a href="/en" class="underline font-semibold">English</a>
+      </div>
+    </div>
+  </header>
+  <main class="flex-1 flex flex-col items-center py-6 md:py-12">
+    <section class="w-full max-w-6xl bg-white rounded-3xl shadow-2xl p-2 md:p-16 mb-8 border border-blue-100 flex flex-col gap-8">
+      <h1 class="text-2xl md:text-4xl font-bold text-blue-900 mb-2 text-center">Korean Address Converter</h1>
+      <p class="text-center text-gray-600 mb-2 md:mb-4 text-base md:text-lg">Instantly convert Korean addresses to English with postal code lookup.<br>For international shipping, business, and public institutions.</p>
+      <div class="bg-blue-50 border-l-4 border-blue-700 p-3 md:p-6 mb-2 md:mb-4 text-blue-900 text-xs md:text-base rounded">
+        This service uses the official Korean government address API and Kakao Map API to provide accurate address information.<br>
+        Supports road name, lot number, English address conversion, and postal code lookup in a single search.<br>
+        All address details are presented in a clean, table format ready for international shipping, documentation, and official use.
+      </div>
+      <div class="mb-2 md:mb-4 w-full flex flex-col items-center">
+        <form id="address-form" class="w-full flex flex-col sm:flex-row gap-2 md:gap-4 items-center bg-gray-50 rounded-xl shadow px-2 py-3 md:px-8 md:py-6">
+          <input type="text" class="w-full sm:flex-1 min-w-0 border border-gray-300 rounded-lg px-4 py-3 md:px-6 md:py-4 focus:outline-none focus:ring-2 focus:ring-blue-700 text-base md:text-lg bg-white" id="korean-address" placeholder="e.g. 217 Hyangdong-ro, Goyang-si" required>
+          <button type="submit" class="w-full sm:w-auto bg-blue-700 hover:bg-blue-800 text-white font-semibold rounded-lg px-6 md:px-10 py-3 md:py-4 transition text-base md:text-lg whitespace-nowrap shadow">Convert Address</button>
+        </form>
+        <div class="text-xs text-gray-500 mt-2 text-center">For best results, enter a full road name or lot number address.<br>e.g. "217 Hyangdong-ro, Goyang-si", "1-1 Sejong-ro, Jongno-gu, Seoul"</div>
+      </div>
+      <div id="result" class="mb-2 md:mb-4"></div>
+      <div class="my-4 md:my-8">
+        <div class="ad-placeholder border-2 border-dashed border-gray-300 rounded-lg py-6 md:py-10 text-center text-gray-400 text-xs md:text-sm bg-gray-100">[Ad space - Google AdSense]</div>
+      </div>
+      <div id="map-container" style="display:none;">
+        <div id="map" class="w-full h-64 md:h-[480px] rounded-lg overflow-hidden border border-gray-200"></div>
+      </div>
+    </section>
+    <section class="w-full max-w-6xl bg-white rounded-xl shadow p-4 md:p-8 mb-8">
+      <h2 class="text-lg md:text-xl font-bold text-blue-900 mb-2">Data Source & Reliability</h2>
+      <ul class="list-disc pl-5 text-gray-700 text-xs md:text-sm">
+        <li><b>Korean Government Address API</b>: Uses the official address API provided by the Ministry of the Interior and Safety of Korea. All address data is up-to-date and reliable.</li>
+        <li><b>Kakao Map API</b>: Provides accurate location and map visualization using Kakao's latest map database.</li>
+        <li>All data is sourced from official public APIs for maximum accuracy and reliability.</li>
+      </ul>
+    </section>
+    <section class="w-full max-w-6xl bg-white rounded-xl shadow p-4 md:p-8 mb-8">
+      <h2 class="text-lg md:text-xl font-bold text-blue-900 mb-2">Ads & Policy</h2>
+      <ul class="list-disc pl-5 text-gray-700 text-xs md:text-sm">
+        <li>Google AdSense ads may be displayed. All ads comply with Google policies.</li>
+        <li>No personal information is stored. Input data is used only for conversion and map display.</li>
+        <li>Contact: <a href="mailto:cadosy@gmail.com" class="text-blue-700 underline">cadosy@gmail.com</a> (Manager: Kang Seunghyun)</li>
+      </ul>
+    </section>
+  </main>
+  <footer class="bg-blue-900 text-white w-full text-center text-xs py-6 mt-10">
+    <div>Manager: Kang Seunghyun | Address: 217, Hyangdong-ro, Deogyang-gu, Goyang-si, Gyeonggi-do, Republic of Korea</div>
+    <div>Email: cadosy@gmail.com</div>
+    <div>© 2025 Jusome.com. All rights reserved.</div>
+    <div>
+      <a href="/en/privacy" class="underline">Privacy Policy</a> |
+      <a href="/en/about" class="underline">About</a> |
+      <a href="/en/contact" class="underline">Contact</a>
+    </div>
+  </footer>
+  <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey={{ kakao_javascript_key }}&libraries=services"></script>
+  <script>
+    // 기존 index.html의 JS 코드와 동일하게 복사해서 사용
+    const form = document.getElementById('address-form');
+    const resultDiv = document.getElementById('result');
+    const mapDiv = document.getElementById('map');
+    let map, marker;
+    function getMapSearchCandidates(addr) {
+      if (!addr) return [];
+      let base = addr.split(' (')[0].trim().replace(/\s+/g, ' ');
+      let candidates = [base];
+      // 행정구역 축약 (영문 주소에도 적용)
+      candidates.push(base.replace('Special City', ''), base.replace('Metropolitan City', ''), base.replace('Province', ''));
+      // 'gu' 이하만 남기기
+      const guIdx = base.indexOf('gu ');
+      if (guIdx > -1) candidates.push(base.slice(guIdx));
+      // 'dong' 이하만 남기기
+      const dongIdx = base.indexOf('dong ');
+      if (dongIdx > -1) candidates.push(base.slice(dongIdx));
+      // Road name + building number
+      const roadMatch = base.match(/([A-Za-z\-]+-ro|gil|daero)\s*([0-9]+)/);
+      if (roadMatch) {
+        candidates.push(`${roadMatch[1]} ${roadMatch[2]}`);
+        candidates.push(`${roadMatch[1]}${roadMatch[2]}`);
+      }
+      return [...new Set(candidates.map(s => s.trim().replace(/\s+/g, ' ')).filter(Boolean))];
+    }
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const address = document.getElementById('korean-address').value.trim();
+      if (!address) return;
+      resultDiv.innerHTML = '<div class="text-blue-700">Converting...</div>';
+      document.getElementById('map-container').style.display = 'none';
+      
+      // 주소 검색 요청 (1페이지)
+      await fetchAddresses(address, 1);
+    });
+    
+    // 주소 검색 함수 (페이지네이션 포함)
+    async function fetchAddresses(address, page) {
+      const res = await fetch('/convert', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({address, page})
+      });
+      
+      const data = await res.json();
+      
+      if (data.error) {
+        resultDiv.innerHTML = `<div class='bg-red-100 text-red-700 rounded-lg px-4 py-3 text-center'>${data.error}</div>`;
+        return;
+      }
+      
+      // 검색 결과 목록 표시
+      renderAddressList(data, address);
+    }
+    
+    // 검색 결과 목록 렌더링
+    function renderAddressList(data, searchTerm) {
+      let html = '';
+      const addresses = data.addresses || [];
+      const pagination = data.pagination || { total_count: 0, current_page: 1, total_pages: 0 };
+      
+      if (addresses.length === 0) {
+        resultDiv.innerHTML = `<div class='bg-red-100 text-red-700 rounded-lg px-4 py-3 text-center'>No results found.</div>`;
+        return;
+      }
+      
+      // 검색 결과 상단 정보
+      html += `<div class="mb-4">
+        <div class="flex justify-between items-center mb-2">
+          <h3 class="text-lg font-semibold text-blue-900">Search Results</h3>
+          <span class="text-sm text-gray-600">Showing ${(pagination.current_page-1)*10+1}-${Math.min(pagination.current_page*10, pagination.total_count)} of ${pagination.total_count} results</span>
+        </div>
+        <p class="text-sm text-gray-500 mb-2">Search term: "${searchTerm}"</p>
+      </div>`;
+      
+      // 주소 목록 테이블
+      html += `<div class="bg-white border border-gray-200 rounded-lg shadow-md overflow-hidden mb-4">
+        <table class="w-full text-left">
+          <thead class="bg-gray-50 border-b border-gray-200">
+            <tr>
+              <th class="px-4 py-3 text-gray-700 font-semibold">Address</th>
+              <th class="px-4 py-3 text-gray-700 font-semibold w-24 text-center">Details</th>
+            </tr>
+          </thead>
+          <tbody>`;
+      
+      // 각 주소 행 추가
+      addresses.forEach((addr, index) => {
+        const displayAddr = addr.road_addr || addr.jibun_addr || addr.eng_address || addr.kor_address;
+        html += `<tr class="border-b border-gray-100 hover:bg-gray-50">
+          <td class="px-4 py-3 break-all">${displayAddr}</td>
+          <td class="px-4 py-3 text-center">
+            <button onclick="getAddressDetail('${displayAddr.replace(/'/g, "\\'")}')" 
+                    class="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700">
+              Select
+            </button>
+          </td>
+        </tr>`;
+      });
+      
+      html += `</tbody></table></div>`;
+      
+      // 페이지네이션 UI
+      if (pagination.total_pages > 1) {
+        html += `<div class="flex justify-center gap-1 my-4">`;
+        
+        // 이전 페이지 버튼
+        const prevDisabled = pagination.current_page <= 1;
+        html += `<button 
+                  onclick="fetchAddresses('${searchTerm.replace(/'/g, "\\'")}', ${pagination.current_page - 1})" 
+                  class="px-3 py-1 rounded border ${prevDisabled ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-blue-600 hover:bg-blue-50'}"
+                  ${prevDisabled ? 'disabled' : ''}>
+                  Previous
+                </button>`;
+        
+        // 페이지 번호 버튼들
+        const startPage = Math.max(1, pagination.current_page - 2);
+        const endPage = Math.min(pagination.total_pages, startPage + 4);
+        
+        for (let i = startPage; i <= endPage; i++) {
+          const isCurrentPage = i === pagination.current_page;
+          html += `<button 
+                    onclick="fetchAddresses('${searchTerm.replace(/'/g, "\\'")}', ${i})" 
+                    class="px-3 py-1 rounded border ${isCurrentPage ? 'bg-blue-600 text-white' : 'bg-white text-blue-600 hover:bg-blue-50'}">
+                    ${i}
+                  </button>`;
+        }
+        
+        // 다음 페이지 버튼
+        const nextDisabled = pagination.current_page >= pagination.total_pages;
+        html += `<button 
+                  onclick="fetchAddresses('${searchTerm.replace(/'/g, "\\'")}', ${pagination.current_page + 1})" 
+                  class="px-3 py-1 rounded border ${nextDisabled ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-blue-600 hover:bg-blue-50'}"
+                  ${nextDisabled ? 'disabled' : ''}>
+                  Next
+                </button>`;
+        
+        html += `</div>`;
+      }
+      
+      resultDiv.innerHTML = html;
+      document.getElementById('map-container').style.display = 'none';
+    }
+    
+    // 선택한 주소의 상세 정보 조회
+    async function getAddressDetail(address) {
+      if (!address) return;
+      
+      resultDiv.innerHTML = '<div class="text-blue-700">Loading details...</div>';
+      
+      const res = await fetch('/address_detail', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({address})
+      });
+      
+      const data = await res.json();
+      
+      if (data.error) {
+        resultDiv.innerHTML = `<div class='bg-red-100 text-red-700 rounded-lg px-4 py-3 text-center'>${data.error}</div>`;
+        return;
+      }
+      
+      // 상세 정보 표시
+      let html = '';
+      if (data.eng_address || data.road_addr || data.jibun_addr || data.kor_address) {
+        // 모든 가능한 우편번호 키 확인
+        const postalCode = data.zip_no || data.zipNo || data.postalCode || '';
+        
+        html += '<div class="bg-white border border-gray-200 rounded-lg shadow-md overflow-hidden">';
+        html += '<table class="w-full text-left">';
+        html += '<thead class="bg-gray-50 border-b border-gray-200">';
+        html += '<tr><th class="px-4 py-3 text-gray-700 font-semibold w-1/3">Type</th><th class="px-4 py-3 text-gray-700 font-semibold">Address Information</th></tr>';
+        html += '</thead><tbody>';
+        
+        if (data.eng_address) html += `<tr class="border-b border-gray-100"><td class="px-4 py-3 text-gray-500 font-medium bg-gray-50">English Address</td><td class="px-4 py-3 break-all">${data.eng_address}</td></tr>`;
+        if (data.road_addr) html += `<tr class="border-b border-gray-100"><td class="px-4 py-3 text-gray-500 font-medium bg-gray-50">Road Name Address</td><td class="px-4 py-3 break-all">${data.road_addr}</td></tr>`;
+        if (data.jibun_addr) html += `<tr class="border-b border-gray-100"><td class="px-4 py-3 text-gray-500 font-medium bg-gray-50">Lot Number Address</td><td class="px-4 py-3 break-all">${data.jibun_addr}</td></tr>`;
+        if (data.kor_address) html += `<tr class="border-b border-gray-100"><td class="px-4 py-3 text-gray-500 font-medium bg-gray-50">Korean Address</td><td class="px-4 py-3 break-all">${data.kor_address}</td></tr>`;
+        
+        // 우편번호가 있으면 표시
+        if (postalCode) {
+          html += `<tr><td class="px-4 py-3 text-gray-500 font-medium bg-gray-50">Postal Code</td><td class="px-4 py-3 break-all">${postalCode}</td></tr>`;
+        } else {
+          html += `<tr><td class="px-4 py-3 text-gray-500 font-medium bg-gray-50">Postal Code</td><td class="px-4 py-3 text-red-500">Not available</td></tr>`;
+        }
+        
+        html += '</tbody></table>';
+        html += '</div>';
+        resultDiv.innerHTML = html;
+        
+        // Map search candidates
+        let mapCandidates = [];
+        if (data.road_addr) mapCandidates = mapCandidates.concat(getMapSearchCandidates(data.road_addr));
+        if (data.kor_address) mapCandidates = mapCandidates.concat(getMapSearchCandidates(data.kor_address));
+        mapCandidates = mapCandidates.concat([address]);
+        mapCandidates = [...new Set(mapCandidates)];
+        
+        document.getElementById('map-container').style.display = '';
+        await showMap(mapCandidates);
+      }
+    }
+    async function showMap(addressCandidates) {
+      mapDiv.innerHTML = '';
+      let idx = 0;
+      async function tryNext() {
+        if (idx >= addressCandidates.length) {
+          mapDiv.innerHTML = '<div class="bg-yellow-100 text-yellow-700 rounded-lg px-4 py-3 text-center">Unable to display map.</div>';
+          return;
+        }
+        try {
+          const res = await fetch('/geocode', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({address: addressCandidates[idx]})
+          });
+          const data = await res.json();
+          if (data.lat && data.lng) {
+            mapDiv.innerHTML = '';
+            map = new kakao.maps.Map(mapDiv, {center: new kakao.maps.LatLng(data.lat, data.lng), level: 3});
+            marker = new kakao.maps.Marker({map: map, position: new kakao.maps.LatLng(data.lat, data.lng)});
+            return;
+          } else {
+            idx++;
+            tryNext();
+          }
+        } catch (e) {
+          idx++;
+          tryNext();
+        }
+      }
+      tryNext();
+    }
+  </script>
+</body>
+</html> 
